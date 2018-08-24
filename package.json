@@ -1,0 +1,34 @@
+{
+  "name": "pn_api",
+  "version": "1.0.0",
+  "description": "Node JS API for pn",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon ./start.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JosueCuberoSanchez/pn_api.git"
+  },
+  "author": "Josué Cubero",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JosueCuberoSanchez/pn_api/issues"
+  },
+  "homepage": "https://github.com/JosueCuberoSanchez/pn_api#readme",
+  "dependencies": {
+    "bcrypt": "^3.0.0",
+    "body-parser": "^1.18.3",
+    "connect-mongo": "^2.0.1",
+    "cookie-parser": "^1.4.3",
+    "dotenv": "^6.0.0",
+    "express": "^4.16.3",
+    "express-session": "^1.15.6",
+    "mongoose": "^5.2.9",
+    "slugs": "^0.1.3",
+    "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "morgan": "^1.9.0"
+  }
+}
