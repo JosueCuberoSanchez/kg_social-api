@@ -1,17 +1,16 @@
 /**
- *  Define Pokemon schema
+ *  Define Event schema
  */
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
 const userSchema = new mongoose.Schema({
     email: {type: String, unique: true, required: true, trim: true},
-    firstName: {type: String, unique: true, required: true, trim: true},
-    lastName: {type: String, unique: true, required: true, trim: true},
-    points: {type: Number, unique: true, required: true, trim: true},
-    username: {type: String, unique: true, required: true, trim: true},
+    firstName: {type: String, unique: false, required: true, trim: true},
+    lastName: {type: String, unique: false, required: true, trim: true},
+    points: {type: Number, unique: false, required: true, trim: true, default: 0},
+    username: {type: String, unique: false, required: true, trim: true},
     password: {type: String, required: true},
-    passwordConf: {type: String, required: true}
 });
 
 userSchema.pre('save', function (next) {

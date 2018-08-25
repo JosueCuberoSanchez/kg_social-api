@@ -14,11 +14,7 @@ const respond = function(res, status, content) {
 };
 
 async function login(req, res, next) {
-    console.log('REQID');
-    console.log(req.sessionID);
     if (!req.body.email || !req.body.password) {
-        console.log(req.body.email);
-        console.log(req.body.password);
         respond(res, 400, 'The request is missing some data');
         next();
     } else {
@@ -30,10 +26,15 @@ async function login(req, res, next) {
             } else {
                 bcrypt.compare(req.body.password, user.password, function (err, result) {
                     if (result === true) {
-                        console.log('user: ', user);
-                        respond(res, 200, {user})
+                        respond(res, 200, {
+                            email: user.email,
+                            firstName: user.firstName,
+                            lastName: user.lastName,
+                            points: user.points,
+                            username: user.username,
+                            id: user._id
+                        })
                     } else {
-                        console.log('user: ', user);
                         respond(res, 400, 'Bad credentials')
                     }
                     next();
@@ -47,8 +48,7 @@ async function login(req, res, next) {
 }
 
 async function signup(req, res, next) {
-    if (!req.body.email || !req.body.username || !req.body.password || !req.body.passwordConf
-        || !req.body.lastName || !req.body.firstName || !req.body.points) {
+    if (!req.body.email || !req.body.username || !req.body.password || !req.body.lastName || !req.body.firstName) {
         respond(res, 400, 'The request is missing some data');
         next();
     } else {
@@ -60,7 +60,14 @@ async function signup(req, res, next) {
             try {
                 const user = new User(req.body);
                 await user.save();
-                respond(res, 201, {user})
+                respond(res, 201, {
+                    email: user.email,
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    points: user.points,
+                    username: user.username,
+                    id: user._id
+                })
                 // redirect to dashboard
             } catch (e) {
                 console.log('Error :', e);

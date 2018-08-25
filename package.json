@@ -1,21 +1,21 @@
 {
-  "name": "pn_api",
+  "name": "kg_social-api",
   "version": "1.0.0",
-  "description": "Node JS API for pn",
+  "description": "Node JS API for kg_social",
   "main": "app.js",
   "scripts": {
     "start": "nodemon ./start.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/JosueCuberoSanchez/pn_api.git"
+    "url": "git+https://github.com/JosueCuberoSanchez/kg_social-api.git"
   },
   "author": "Josué Cubero",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/JosueCuberoSanchez/pn_api/issues"
+    "url": "https://github.com/JosueCuberoSanchez/kg_social-api/issues"
   },
-  "homepage": "https://github.com/JosueCuberoSanchez/pn_api#readme",
+  "homepage": "https://github.com/JosueCuberoSanchez/kg_social-api#readme",
   "dependencies": {
     "bcrypt": "^3.0.0",
     "body-parser": "^1.18.3",

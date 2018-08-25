@@ -1,6 +1,6 @@
-# Pokéhunter
+# KK Social API
 
-Pokémon hunter app to help Pokémon trainers fill their pokédex easier.
+NodeJS + Express API for KG Social app.
 
 ## Getting Started
 
@@ -16,19 +16,14 @@ Your favorite editor!
 
 In order to install you should run the following commands:
 
-git clone https://github.com/JosueCuberoSanchez/pokehunter.git
+git clone https://github.com/JosueCuberoSanchez/kg_social-api.git
 cd [generated-directory]
 npm install
 
 ## Built With
 
 * [NodeJS](https://reactjs.org/) - Server side scripting used.
-* [React](https://reactjs.org/) - Frontend framework used.
-* [Babel](https://reactjs.org/) - ES6 transpiler.
-* [Webpack](https://reactjs.org/) - Bundle tool.
-* [Bootstrap](https://getbootstrap.com/) - The styles library used.
-* [React-Bootstrap-Tables](https://reactjs.org/) - Library for results table used.
-* [Reactstrap](https://reactjs.org/) - React styles library used.
+* [Express](http://expressjs.com/es/) - Node JS server used.
 
 ## Versioning
 
