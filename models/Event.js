@@ -7,7 +7,7 @@ const eventSchema = new mongoose.Schema({
     title: {type: String, unique: true, required: true, trim: true},
     description: {type: String, unique: false, required: true, trim: true},
     attendees: {type: [String], unique: false, trim: true, default: []}, // atendees emails
-    image: {type: String, unique: false, required: true, trim: true},
+    image: {type: String, unique: false, required: false, trim: true, default:'https://s3.us-east-2.amazonaws.com/kg-social/default.png'},
     hashtags: {type: [String], unique: false, required: true, trim: true},
     stars: {type: Number, unique: false, trim: true, default: 0},
     private: {type: Boolean, unique: false, required: true, trim: true},

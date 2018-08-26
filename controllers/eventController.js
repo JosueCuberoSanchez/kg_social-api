@@ -15,7 +15,8 @@ const respond = function(res, status, content) {
 };
 
 async function create(req, res, next) {
-    if (!req.body.title || !req.body.description || !req.body.hashtags || !req.body.private || !req.body.image || !req.body.owner) {
+    console.log(req.body);
+    if (!req.body.title || !req.body.description || !req.body.hashtags || !req.body.private || !req.body.owner) {
         respond(res, 400, 'The request is missing some data');
         next();
     } else {
@@ -44,24 +45,35 @@ async function create(req, res, next) {
 }
 
 async function getEvents(req, res, next) {
+    if(!req.query.filter || !req.query.user) {
+        respond(res, 400, 'Bad request for get events');
+        next();
+    }
     let events;
-    if (req.body.filter && req.body.type) {
-        switch (req.body.filter) {
-            case 'active':
-                events = await Event.find({active: req.body.filter});
-                break;
-            case 'enrolled':
-                events = await Event.find({attendees: {$elemMatch:{enroll:{ $gte: req.body.filter }}}});
-                break;
-            case 'top':
-                events = await Event.find().sort([['points', 'descending']]);
-                break;
-            case 'own':
-                events = await Event.find({a: 'hola'});
-                break;
-        }
-    } else {
-        events = await Event.find();
+    switch (req.query.filter) {
+        case 'ALL':
+            events = await Event.find();
+            break;
+        case 'ACTIVE':
+            events = await Event.find({active: true});
+            break;
+        case 'ENROLLED':
+            events = await Event.find({attendees: {$elemMatch:{enroll:{ $gte: req.query.user }}}});
+            break;
+        case 'TOP':
+            events = await Event.find().sort([['points', 'descending']]);
+            break;
+        case 'OWNED':
+            events = await Event.find({owner: req.query.user});
+            break;
+        case 'ID':
+            events = await Event.findOne({_id: req.query.id});
+            if(req.query.user === events.owner){
+                events['owner'] = true;
+            } else {
+                events['owner'] = false;
+            }
+            break;
     }
     if (!events) {
         respond(res, 404, 'There are no events in the db');
@@ -76,4 +88,26 @@ async function getEvents(req, res, next) {
     }
 }
 
-module.exports = { create, getEvents };
+async function updateEventImage(req, res, next) {
+    if(!req.body.image || !req.body.id) {
+        respond(res, 400, 'Bad request for image update');
+        next();
+    }
+    const event = await Event.findOne({_id: req.body.id});
+    event['image'] = req.body.image;
+    if (!event) {
+        respond(res, 404, 'Event not found');
+        next();
+    }
+    const conditions = { _id: req.body.id }, update = { image: req.body.image }, options = { multi: false };
+    await Event.update(conditions, update, options);
+    //event.update({image: req.body.image});
+    try {
+        respond(res, 200, {event})
+    } catch (e) {
+        console.log('Error :', e);
+        next(e);
+    }
+}
+
+module.exports = { create, getEvents, updateEventImage };

@@ -9,5 +9,6 @@ apiRouter.post('/signup', userController.signup);
 apiRouter.get('/logout', userController.logout);
 apiRouter.post('/event', eventController.create);
 apiRouter.get('/event', eventController.getEvents);
+apiRouter.post('/event/image', eventController.updateEventImage);
 
 module.exports = apiRouter;
