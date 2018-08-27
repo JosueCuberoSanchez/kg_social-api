@@ -15,8 +15,7 @@ const respond = function(res, status, content) {
 };
 
 async function create(req, res, next) {
-    console.log(req.body);
-    if (!req.body.title || !req.body.description || !req.body.hashtags || !req.body.private || !req.body.owner) {
+    if (!req.body.title || !req.body.description || !req.body.hashtags || !req.body.owner) {
         respond(res, 400, 'The request is missing some data');
         next();
     } else {
@@ -27,7 +26,7 @@ async function create(req, res, next) {
         } else {
             try {
                 const requestBody = req.body;
-                const owner = await User.findOne({email:requestBody.owner});
+                const owner = await User.findOne({username:requestBody.owner});
                 if(!owner) {
                     respond(res, 404, 'Owner not found');
                 } else {
@@ -35,7 +34,6 @@ async function create(req, res, next) {
                     await event.save();
                     respond(res, 201, {event})
                 }
-                // redirect to dashboard
             } catch (e) {
                 console.log('Error :', e);
                 next(e);
@@ -68,11 +66,6 @@ async function getEvents(req, res, next) {
             break;
         case 'ID':
             events = await Event.findOne({_id: req.query.id});
-            if(req.query.user === events.owner){
-                events['owner'] = true;
-            } else {
-                events['owner'] = false;
-            }
             break;
     }
     if (!events) {
@@ -101,7 +94,6 @@ async function updateEventImage(req, res, next) {
     }
     const conditions = { _id: req.body.id }, update = { image: req.body.image }, options = { multi: false };
     await Event.update(conditions, update, options);
-    //event.update({image: req.body.image});
     try {
         respond(res, 200, {event})
     } catch (e) {

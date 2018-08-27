@@ -9,8 +9,9 @@ const userSchema = new mongoose.Schema({
     firstName: {type: String, unique: false, required: true, trim: true},
     lastName: {type: String, unique: false, required: true, trim: true},
     points: {type: Number, unique: false, required: true, trim: true, default: 0},
-    username: {type: String, unique: false, required: true, trim: true},
+    username: {type: String, unique: true, required: true, trim: true},
     password: {type: String, required: true},
+    image: {type: String, unique: false, required: false, trim: true, default:'https://s3.us-east-2.amazonaws.com/kg-social/user-default.png'},
 });
 
 userSchema.pre('save', function (next) {

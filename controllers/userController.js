@@ -68,7 +68,6 @@ async function signup(req, res, next) {
                     username: user.username,
                     id: user._id
                 })
-                // redirect to dashboard
             } catch (e) {
                 console.log('Error :', e);
                 next(e);
