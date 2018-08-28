@@ -12,7 +12,9 @@ const eventSchema = new mongoose.Schema({
     stars: {type: Number, unique: false, trim: true, default: 0},
     private: {type: Boolean, unique: false, required: true, trim: true},
     active: {type: Boolean, unique: false, trim: true, default: true},
-    owner: {type: String, unique: false, trim: true, required: true}
+    owner: {type: String, unique: false, trim: true, required: true},
+    location: {type: String, unique: false, trim: true, required: true},
+    date: {type: Date, unique: false, trim: true, required: true}
 });
 
 const Event = mongoose.model('events', eventSchema);

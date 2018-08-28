@@ -15,29 +15,56 @@ const respond = function(res, status, content) {
 };
 
 async function create(req, res, next) {
-    if (!req.body.title || !req.body.description || !req.body.hashtags || !req.body.owner) {
+    if (!req.body.title || !req.body.description || !req.body.hashtags 
+        || !req.body.owner || !req.body.location || !req.body.date) {
         respond(res, 400, 'The request is missing some data');
         next();
     } else {
-        const event = await Event.findOne({title: req.body.title});
-        if (event) {
-            respond(res, 409, 'That event already exists in the system');
-            next();
-        } else {
-            try {
-                const requestBody = req.body;
-                const owner = await User.findOne({username:requestBody.owner});
-                if(!owner) {
-                    respond(res, 404, 'Owner not found');
+        try {
+            if(req.body.create) { // create new event
+                const event = await Event.findOne({title: req.body.title});
+                if (event && req.body.create) {
+                    respond(res, 409, 'That event already exists in the system');
+                    next();
                 } else {
-                    const event = new Event(requestBody);
-                    await event.save();
-                    respond(res, 201, {event})
+                    const requestBody = req.body;
+                    const owner = await User.findOne({username:requestBody.owner});
+                    if(!owner) {
+                        respond(res, 404, 'Owner not found');
+                    } else {
+                        const event = new Event(requestBody);
+                        await event.save();
+                        respond(res, 201, {event});
+                    }
+                }  
+            } else { // update event
+                if(!req.body.id) {
+                    respond(res, 400, 'Missing event id');
+                } else {
+                    console.log(req.body);
+                    const event = await Event.findOne({_id: req.body.id});
+                    if (!event) {
+                        respond(res, 404, 'Event not found');
+                        next();
+                    } else {
+                        event['title'] = req.body.title;
+                        event['description'] = req.body.description;
+                        event['hashtags'] = req.body.hashtags;
+                        event['private'] = req.body.private;
+                        const conditions = { _id: req.body.id }, update = { 
+                            title: req.body.title,
+                            description: req.body.description,
+                            hasgtags: req.body.hashtags,
+                            private: req.body.private
+                        }, options = { multi: false };
+                        await Event.update(conditions, update, options);
+                        respond(res, 200, {event});
+                    }
                 }
-            } catch (e) {
-                console.log('Error :', e);
-                next(e);
             }
+        } catch (e) {
+            console.log('Error :', e);
+            next(e);
         }
     }
 }
@@ -56,10 +83,11 @@ async function getEvents(req, res, next) {
             events = await Event.find({active: true});
             break;
         case 'ENROLLED':
-            events = await Event.find({attendees: {$elemMatch:{enroll:{ $gte: req.query.user }}}});
+            events = await Event.find({$or:[ {attendees: {$elemMatch:{enroll:{ $gte: req.query.user }}}},{owner: req.query.user}]});
             break;
         case 'TOP':
-            events = await Event.find().sort([['points', 'descending']]);
+            console.log('HUE');
+            events = await Event.find().sort([['stars', 'descending']]);
             break;
         case 'OWNED':
             events = await Event.find({owner: req.query.user});
@@ -73,7 +101,7 @@ async function getEvents(req, res, next) {
         next();
     } else {
         try {
-            respond(res, 200, {events})
+            respond(res, 200, {events});
         } catch (e) {
             console.log('Error :', e);
             next(e);
@@ -95,11 +123,54 @@ async function updateEventImage(req, res, next) {
     const conditions = { _id: req.body.id }, update = { image: req.body.image }, options = { multi: false };
     await Event.update(conditions, update, options);
     try {
-        respond(res, 200, {event})
+        respond(res, 200, {event});
     } catch (e) {
         console.log('Error :', e);
         next(e);
     }
 }
 
-module.exports = { create, getEvents, updateEventImage };
+async function enrollToEvent(req, res, next) {
+    try {
+        if(!req.body.username || !req.body.eventId){
+            respond(res, 400, 'Bad request to enroll event');
+        } else {
+            const event = await Event.findOne({_id: req.body.eventId});
+            const user = await User.findOne({username: req.body.username});
+            if(!event || !user){
+                respond(res, 404, 'Not found');
+            } else {
+                event.attendees.push(req.body.username);
+                event.save();
+                respond(res, 200, {event});
+            }
+        }
+    } catch (e) {
+        console.log('Error :', e);
+        next(e);
+    }
+}
+
+async function unenrollToEvent(req, res, next) {
+    try {
+        if(!req.body.username || !req.body.eventId){
+            respond(res, 400, 'Bad request to unenroll to event');
+        } else {
+            const event = await Event.findOne({_id: req.body.eventId});
+            const user = await User.findOne({username: req.body.username});
+            if(!event || !user){
+                respond(res, 404, 'Not found');
+            } else {
+                event.attendees.pull(req.body.username);
+                event.save();
+                console.log(event);
+                respond(res, 200, {event});
+            }
+        }
+    } catch (e) {
+        console.log('Error :', e);
+        next(e);
+    }
+}
+
+module.exports = { create, getEvents, updateEventImage, enrollToEvent, unenrollToEvent };
