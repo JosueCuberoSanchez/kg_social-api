@@ -5,8 +5,10 @@ const mongoose = require('mongoose');
 
 require('../models/Event');
 require('../models/User');
+require('../models/Log');
 const Event = mongoose.model('events');
 const User = mongoose.model('users');
+const Log = mongoose.model('logs');
 
 // JSON response utility function
 const respond = function(res, status, content) {
@@ -34,6 +36,12 @@ async function create(req, res, next) {
                     } else {
                         const event = new Event(requestBody);
                         await event.save();
+                        const log = new Log({
+                            action:event.owner + ' has created the event ' + event.title,
+                            date: new Date(),
+                            link: 'localhost:8080/event/'+event._id
+                        })
+                        log.save();
                         respond(res, 201, {event});
                     }
                 }  
@@ -51,13 +59,23 @@ async function create(req, res, next) {
                         event['description'] = req.body.description;
                         event['hashtags'] = req.body.hashtags;
                         event['private'] = req.body.private;
+                        event['location'] = req.body.location;
+                        event['date'] = req.body.date;
                         const conditions = { _id: req.body.id }, update = { 
                             title: req.body.title,
                             description: req.body.description,
                             hasgtags: req.body.hashtags,
-                            private: req.body.private
+                            private: req.body.private,
+                            location: req.body.location,
+                            date: req.body.date
                         }, options = { multi: false };
                         await Event.update(conditions, update, options);
+                        const log = new Log({
+                            action:event.owner + ' has updated ' + event.title + ' information',
+                            date: new Date(),
+                            link: 'localhost:8080/event/'+req.body.id
+                        })
+                        log.save();
                         respond(res, 200, {event});
                     }
                 }
@@ -110,19 +128,25 @@ async function getEvents(req, res, next) {
 }
 
 async function updateEventImage(req, res, next) {
-    if(!req.body.image || !req.body.id) {
-        respond(res, 400, 'Bad request for image update');
-        next();
-    }
-    const event = await Event.findOne({_id: req.body.id});
-    event['image'] = req.body.image;
-    if (!event) {
-        respond(res, 404, 'Event not found');
-        next();
-    }
-    const conditions = { _id: req.body.id }, update = { image: req.body.image }, options = { multi: false };
-    await Event.update(conditions, update, options);
     try {
+        if(!req.body.image || !req.body.id) {
+            respond(res, 400, 'Bad request for image update');
+            next();
+        }
+        const event = await Event.findOne({_id: req.body.id});
+        event['image'] = req.body.image;
+        if (!event) {
+            respond(res, 404, 'Event not found');
+            next();
+        }
+        const conditions = { _id: req.body.id }, update = { image: req.body.image }, options = { multi: false };
+        await Event.update(conditions, update, options);
+        const log = new Log({
+            action:event.owner + ' has updated ' + event.title + ' main photo',
+            date: new Date(),
+            link: 'localhost:8080/event/'+req.body.id
+        })
+        log.save();
         respond(res, 200, {event});
     } catch (e) {
         console.log('Error :', e);
@@ -142,6 +166,12 @@ async function enrollToEvent(req, res, next) {
             } else {
                 event.attendees.push(req.body.username);
                 event.save();
+                const log = new Log({
+                    action:user.username + ' has enrolled to ' + event.title,
+                    date: new Date(),
+                    link: 'localhost:8080/event/'+req.body.eventId
+                })
+                log.save();
                 respond(res, 200, {event});
             }
         }
@@ -163,7 +193,12 @@ async function unenrollToEvent(req, res, next) {
             } else {
                 event.attendees.pull(req.body.username);
                 event.save();
-                console.log(event);
+                const log = new Log({
+                    action:user.username + ' has unenrolled from ' + event.title,
+                    date: new Date(),
+                    link: 'localhost:8080/event/'+req.body.eventId
+                })
+                log.save();
                 respond(res, 200, {event});
             }
         }

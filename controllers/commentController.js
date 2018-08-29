@@ -6,9 +6,11 @@ const mongoose = require('mongoose');
 require('../models/Event');
 require('../models/User');
 require('../models/Comment');
+require('../models/Log');
 const Event = mongoose.model('events');
 const User = mongoose.model('users');
 const Comment = mongoose.model('comments');
+const Log = mongoose.model('logs');
 
 // JSON response utility function
 const respond = function(res, status, content) {
@@ -32,6 +34,12 @@ async function createComment(req, res, next) {
             } else {
                 const comment = new Comment(requestBody);
                 await comment.save();
+                const log = new Log({
+                    action:req.body.author + ' has commented on ' + event.title + ' event',
+                    date: new Date(),
+                    link: 'localhost:8080/event/' + req.body.eventId
+                })
+                log.save();
                 comment['authorImage'] = author.image;
                 respond(res, 201, {comment})
             }

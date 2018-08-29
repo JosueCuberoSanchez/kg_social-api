@@ -5,7 +5,9 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
 require('../models/User');
+require('../models/Log');
 const User = mongoose.model('users');
+const Log = mongoose.model('logs');
 
 // JSON response utility function
 const respond = function(res, status, content) {
@@ -60,6 +62,12 @@ async function signup(req, res, next) {
             try {
                 const user = new User(req.body);
                 await user.save();
+                const log = new Log({
+                    action:user.username + ' has joined KG Social!',
+                    date: new Date(),
+                    link: 'localhost:8080/profile/'+req.body.username
+                })
+                log.save();
                 respond(res, 201, {
                     email: user.email,
                     firstName: user.firstName,
