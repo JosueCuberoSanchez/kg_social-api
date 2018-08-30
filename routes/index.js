@@ -17,5 +17,6 @@ apiRouter.get('/comment', commentController.getComments);
 apiRouter.post('/enroll', eventController.enrollToEvent);
 apiRouter.post('/unenroll', eventController.unenrollToEvent);
 apiRouter.get('/log', logController.getLog);
+apiRouter.get('/attendees', eventController.getAttendees);
 
 module.exports = apiRouter;

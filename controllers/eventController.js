@@ -6,9 +6,11 @@ const mongoose = require('mongoose');
 require('../models/Event');
 require('../models/User');
 require('../models/Log');
+require('../models/Attendee');
 const Event = mongoose.model('events');
 const User = mongoose.model('users');
 const Log = mongoose.model('logs');
+const Attendee = mongoose.model('attendees');
 
 // JSON response utility function
 const respond = function(res, status, content) {
@@ -36,10 +38,17 @@ async function create(req, res, next) {
                     } else {
                         const event = new Event(requestBody);
                         await event.save();
+                        const attendee = new Attendee({
+                            username: owner.username,
+                            image: owner.image,
+                            event: event._id
+                        });
+                        attendee.save();
                         const log = new Log({
                             action:event.owner + ' has created the event ' + event.title,
                             date: new Date(),
-                            link: 'localhost:8080/event/'+event._id
+                            link: 'event/'+event._id,
+                            author: owner.image
                         })
                         log.save();
                         respond(res, 201, {event});
@@ -70,10 +79,12 @@ async function create(req, res, next) {
                             date: req.body.date
                         }, options = { multi: false };
                         await Event.update(conditions, update, options);
+                        const owner = await User.findOne({username: event.owner});
                         const log = new Log({
-                            action:event.owner + ' has updated ' + event.title + ' information',
+                            action:owner.username + ' has updated ' + event.title + ' information',
                             date: new Date(),
-                            link: 'localhost:8080/event/'+req.body.id
+                            link: 'event/'+req.body.id,
+                            author: owner.image
                         })
                         log.save();
                         respond(res, 200, {event});
@@ -141,10 +152,12 @@ async function updateEventImage(req, res, next) {
         }
         const conditions = { _id: req.body.id }, update = { image: req.body.image }, options = { multi: false };
         await Event.update(conditions, update, options);
+        const owner = await User.findOne({username: event.owner});
         const log = new Log({
-            action:event.owner + ' has updated ' + event.title + ' main photo',
+            action:owner.username + ' has updated ' + event.title + ' main photo',
             date: new Date(),
-            link: 'localhost:8080/event/'+req.body.id
+            link: 'event/'+req.body.id,
+            author: owner.image
         })
         log.save();
         respond(res, 200, {event});
@@ -164,15 +177,21 @@ async function enrollToEvent(req, res, next) {
             if(!event || !user){
                 respond(res, 404, 'Not found');
             } else {
-                event.attendees.push(req.body.username);
-                event.save();
+                const attendee = new Attendee({
+                    username: user.username,
+                    image: user.image,
+                    event: event._id
+                });
+                await attendee.save();
+                const attendees = await Attendee.find({event: req.body.eventId});
                 const log = new Log({
                     action:user.username + ' has enrolled to ' + event.title,
                     date: new Date(),
-                    link: 'localhost:8080/event/'+req.body.eventId
+                    link: 'event/'+req.body.eventId,
+                    author: user.image
                 })
                 log.save();
-                respond(res, 200, {event});
+                respond(res, 200, {attendees});
             }
         }
     } catch (e) {
@@ -191,15 +210,16 @@ async function unenrollToEvent(req, res, next) {
             if(!event || !user){
                 respond(res, 404, 'Not found');
             } else {
-                event.attendees.pull(req.body.username);
-                event.save();
+                Attendee.find({username: req.body.username}).remove().exec();
+                const attendees = await Attendee.find({event: req.body.eventId});
                 const log = new Log({
                     action:user.username + ' has unenrolled from ' + event.title,
                     date: new Date(),
-                    link: 'localhost:8080/event/'+req.body.eventId
+                    link: 'event/'+req.body.eventId,
+                    author: user.image
                 })
                 log.save();
-                respond(res, 200, {event});
+                respond(res, 200, {attendees});
             }
         }
     } catch (e) {
@@ -208,4 +228,23 @@ async function unenrollToEvent(req, res, next) {
     }
 }
 
-module.exports = { create, getEvents, updateEventImage, enrollToEvent, unenrollToEvent };
+async function getAttendees(req, res, next) {
+    try {
+        if(!req.query.id){
+            respond(res, 400, 'Bad request, missing event id');
+        } else {
+            const event = await Event.findOne({_id: req.query.id});
+            if(!event){
+                respond(res, 404, 'Event not found');
+            } else {
+                const attendees = await Attendee.find({event: req.query.id});
+                respond(res, 200, {attendees});
+            }
+        }
+    } catch (e) {
+        console.log('Error :', e);
+        next(e);
+    }
+}
+
+module.exports = { create, getEvents, updateEventImage, enrollToEvent, unenrollToEvent, getAttendees };

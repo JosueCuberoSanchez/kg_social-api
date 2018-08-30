@@ -65,7 +65,8 @@ async function signup(req, res, next) {
                 const log = new Log({
                     action:user.username + ' has joined KG Social!',
                     date: new Date(),
-                    link: 'localhost:8080/profile/'+req.body.username
+                    link: 'profile/'+req.body.username,
+                    author: user.image
                 })
                 log.save();
                 respond(res, 201, {

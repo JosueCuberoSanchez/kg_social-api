@@ -37,7 +37,8 @@ async function createComment(req, res, next) {
                 const log = new Log({
                     action:req.body.author + ' has commented on ' + event.title + ' event',
                     date: new Date(),
-                    link: 'localhost:8080/event/' + req.body.eventId
+                    link: 'event/' + req.body.eventId,
+                    author: author.image
                 })
                 log.save();
                 comment['authorImage'] = author.image;
