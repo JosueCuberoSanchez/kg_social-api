@@ -9,6 +9,7 @@ const eventSchema = new mongoose.Schema({
     image: {type: String, unique: false, required: false, trim: true, default:'https://s3.us-east-2.amazonaws.com/kg-social/default.png'},
     hashtags: {type: [String], unique: false, required: true, trim: true},
     stars: {type: Number, unique: false, trim: true, default: 0},
+    votes: {type: Number, unique: false, trim: true, default: 0},
     private: {type: Boolean, unique: false, required: true, trim: true},
     active: {type: Boolean, unique: false, trim: true, default: true},
     owner: {type: String, unique: false, trim: true, required: true},

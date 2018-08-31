@@ -5,6 +5,7 @@ const userController = require('../controllers/userController');
 const eventController = require('../controllers/eventController');
 const commentController = require('../controllers/commentController');
 const logController = require('../controllers/logController');
+const voteController = require('../controllers/voteController');
 
 apiRouter.post('/login', userController.login);
 apiRouter.post('/signup', userController.signup);
@@ -18,5 +19,7 @@ apiRouter.post('/enroll', eventController.enrollToEvent);
 apiRouter.post('/unenroll', eventController.unenrollToEvent);
 apiRouter.get('/log', logController.getLog);
 apiRouter.get('/attendees', eventController.getAttendees);
+apiRouter.post('/votes', voteController.vote);
+apiRouter.get('/votes', voteController.checkVote);
 
 module.exports = apiRouter;
