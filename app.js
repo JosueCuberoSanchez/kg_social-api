@@ -23,9 +23,7 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 app.use(session({
     genid: (req) => {
-        console.log('Inside the session middleware');
-        console.log(req.sessionID);
-        return uuid() // use UUIDs for session IDs
+        return uuid()
     },
     secret: 'keyboard cat',
     resave: false,
