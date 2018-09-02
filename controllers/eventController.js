@@ -43,7 +43,8 @@ async function create(req, res, next) {
                             image: owner.image,
                             event: event._id
                         });
-                        attendee.save();
+                        await attendee.save();
+                        const attendees = await Attendee.find({event: event._id});
                         const log = new Log({
                             action:event.owner + ' has created the event ' + event.title,
                             date: new Date(),
@@ -51,7 +52,7 @@ async function create(req, res, next) {
                             author: owner.image
                         })
                         log.save();
-                        respond(res, 201, {event});
+                        respond(res, 201, {event: event, attendees: attendees});
                     }
                 }  
             } else { // update event
@@ -79,15 +80,16 @@ async function create(req, res, next) {
                             date: req.body.date
                         }, options = { multi: false };
                         await Event.update(conditions, update, options);
+                        const attendees = await Attendee.find({event: req.body.id});
                         const owner = await User.findOne({username: event.owner});
                         const log = new Log({
                             action:owner.username + ' has updated ' + event.title + ' information',
                             date: new Date(),
                             link: 'event/'+req.body.id,
                             author: owner.image
-                        })
+                        });
                         log.save();
-                        respond(res, 200, {event});
+                        respond(res, 200, {event: event, attendees: attendees});
                     }
                 }
             }
@@ -104,6 +106,7 @@ async function getEvents(req, res, next) {
         next();
     }
     let events;
+    let attendees;
     switch (req.query.filter) {
         case 'ALL':
             events = await Event.find();
@@ -123,6 +126,7 @@ async function getEvents(req, res, next) {
             break;
         case 'ID':
             events = await Event.findOne({_id: req.query.id});
+            attendees = await Attendee.find({event: req.query.id});
             break;
     }
     if (!events) {
@@ -130,7 +134,11 @@ async function getEvents(req, res, next) {
         next();
     } else {
         try {
-            respond(res, 200, {events});
+            if(req.query.filter === 'ID'){
+                respond(res, 200, {event: events, attendees: attendees});
+            } else {
+                respond(res, 200, {events});
+            }
         } catch (e) {
             console.log('Error :', e);
             next(e);
