@@ -12,6 +12,7 @@ const passwordVerificationController = require('../controllers/passwordVerificat
 apiRouter.post('/login', userController.login);
 apiRouter.post('/signup', userController.signup);
 apiRouter.get('/logout', userController.logout);
+apiRouter.get('/user', userController.getUser);
 apiRouter.post('/event', eventController.create);
 apiRouter.get('/event', eventController.getEvents);
 apiRouter.post('/event/image', eventController.updateEventImage);

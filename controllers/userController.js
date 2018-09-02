@@ -41,8 +41,13 @@ async function login(req, res, next) {
                                 email: user.email,
                                 firstName: user.firstName,
                                 lastName: user.lastName,
+                                phone: user.phone,
                                 points: user.points,
                                 username: user.username,
+                                facebook: user.facebook,
+                                twitter: user.twitter,
+                                instagram: user.instagram,
+                                image: user.image,
                                 id: user._id
                             });
                         } else {
@@ -97,14 +102,7 @@ async function signup(req, res, next) {
 
                 EmailSender.sendEmail(req.body.firstName, req.body.lastName, req.body.email, code, Constants.SIGN_UP_VERIFICATION);
 
-                respond(res, 201, {
-                    email: user.email,
-                    firstName: user.firstName,
-                    lastName: user.lastName,
-                    points: user.points,
-                    username: user.username,
-                    id: user._id
-                });
+                respond(res, 201, 'User created');
             } catch (e) {
                 console.log('Error :', e);
                 next(e);
@@ -124,4 +122,37 @@ async function logout(req, res, next) {
     respond(res, 200)
 }
 
-module.exports = { login, signup, logout };
+async function getUser(req, res, next) {
+    if (!req.query.username) {
+        respond(res, 400, 'The request is missing some data');
+        next();
+    } else {
+        try {
+            const user = await User.findOne({username: req.query.username});
+            if (!user) {
+                respond(res, 404, 'User not found');
+                next();
+            } else {
+                respond(res, 200, {
+                    email: user.email,
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    phone: user.phone,
+                    points: user.points,
+                    username: user.username,
+                    facebook: user.facebook,
+                    twitter: user.twitter,
+                    instagram: user.instagram,
+                    image: user.image,
+                    id: user._id
+                });
+                next();
+            }
+        } catch (e) {
+            console.log('Error :', e);
+            next(e) // do not let the server hanging
+        }
+    }
+}
+
+module.exports = { login, signup, logout, getUser };

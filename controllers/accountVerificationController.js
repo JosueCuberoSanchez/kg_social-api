@@ -33,7 +33,7 @@ async function verifyCode(req, res, next) {
                     const log = new Log({
                         action:user.username + ' has joined KG Social!',
                         date: new Date(),
-                        link: 'profile/'+req.body.username,
+                        link: 'profile/'+user.username,
                         author: user.image
                     });
                     log.save();
