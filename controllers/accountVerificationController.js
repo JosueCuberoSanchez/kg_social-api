@@ -3,6 +3,7 @@
  */
 const mongoose = require('mongoose');
 
+// Models
 require('../models/AccountVerification');
 require('../models/User');
 require('../models/Log');
@@ -21,36 +22,48 @@ async function verifyCode(req, res, next) {
         if (!req.query.code) {
             respond(res, 400, 'The request is missing some data');
             next();
-        } else {
-            const verification = await AccountVerification.findOne({code:req.query.code}); // get verification
-            if(!verification) {
-                respond(res, 404, 'Verification not found');
-            } else {
-                const user = await User.findOne({_id:verification.user});
-                if(!user){
-                    respond(res, 404, 'User not found');
-                } else {
-                    const log = new Log({
-                        action:user.username + ' has joined KG Social!',
-                        date: new Date(),
-                        link: 'profile/'+user.username,
-                        author: user.image
-                    });
-                    log.save();
-                    user.active = true;
-                    user.save();
-                    AccountVerification.remove({code:req.query.code}).exec();
-                    respond(res, 200, {
-                        email: user.email,
-                        firstName: user.firstName,
-                        lastName: user.lastName,
-                        points: user.points,
-                        username: user.username,
-                        id: user._id
-                    });
-                }
-            }
         }
+        const verification = await AccountVerification.findOne({code:req.query.code}); // get verification
+        if(!verification) {
+            respond(res, 404, 'Verification not found');
+            next();
+        }
+        const user = await User.findOne({_id:verification.user});
+        if(!user){
+            respond(res, 404, 'User not found');
+            next();
+        }
+
+        // Create a KG join log
+        const log = new Log({
+            action:user.username + ' has joined KG Social!',
+            date: new Date(),
+            link: 'profile/'+user.username,
+            author: user.image
+        });
+        log.save();
+
+        // Modify user state
+        user.active = true;
+        user.save();
+
+        // Delete account verification
+        AccountVerification.remove({code:req.query.code}).exec();
+
+        // Respond
+        respond(res, 200, {
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            phone: user.phone,
+            twitter: user.twitter,
+            facebook: user.facebook,
+            instagram: user.instagram,
+            points: user.points,
+            username: user.username,
+            id: user._id
+        });
+        next();
     } catch (e) {
         console.log('Error :', e);
         next(e);

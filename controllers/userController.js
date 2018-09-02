@@ -2,14 +2,19 @@
  * User controller
  */
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
 
+// Models
 require('../models/User');
 require('../models/AccountVerification');
 const User = mongoose.model('users');
 const AccountVerification = mongoose.model('accountVerifications');
+
+// Helpers
 const EmailSender = require('../helpers/functions');
 const Constants = require('../helpers/constants');
+const bcrypt = require('bcrypt');
+
+// Unique ID generator
 const uuidv1 = require('uuid/v1');
 
 // JSON response utility function

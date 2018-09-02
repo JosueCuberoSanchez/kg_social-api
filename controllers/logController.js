@@ -3,6 +3,7 @@
  */
 const mongoose = require('mongoose');
 
+// Models
 require('../models/Event');
 require('../models/User');
 require('../models/Log')

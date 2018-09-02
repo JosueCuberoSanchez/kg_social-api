@@ -3,6 +3,7 @@
  */
 const mongoose = require('mongoose');
 
+// Models
 require('../models/Event');
 require('../models/User');
 require('../models/Vote');
@@ -31,6 +32,8 @@ async function vote(req, res, next) {
             respond(res, 404, 'Not found');
             next();
         }
+
+        // Create a vote log
         const log = new Log({
             action:req.body.username + ' has rated ' + event.title + ' with ' + req.body.stars + ' stars.',
             date: new Date(),
@@ -38,14 +41,20 @@ async function vote(req, res, next) {
             author: user.image
         });
         log.save();
+
+        // Create the vote
         const vote = new Vote({
             username: req.body.username,
             event: req.body.event
         });
         vote.save();
+
+        // Update event vote info
         event.stars += req.body.stars;
         event.votes += 1;
         event.save();
+
+        // Respond
         respond(res, 200, {event});
     } catch (e) {
         console.log('Error :', e);
