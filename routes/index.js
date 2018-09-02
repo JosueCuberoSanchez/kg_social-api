@@ -7,6 +7,7 @@ const commentController = require('../controllers/commentController');
 const logController = require('../controllers/logController');
 const voteController = require('../controllers/voteController');
 const accountVerificationController = require('../controllers/accountVerificationController');
+const passwordVerificationController = require('../controllers/passwordVerificationController');
 
 apiRouter.post('/login', userController.login);
 apiRouter.post('/signup', userController.signup);
@@ -22,6 +23,9 @@ apiRouter.get('/log', logController.getLog);
 apiRouter.get('/attendees', eventController.getAttendees);
 apiRouter.post('/votes', voteController.vote);
 apiRouter.get('/votes', voteController.checkVote);
-apiRouter.get('/verify', accountVerificationController.verifyCode);
+apiRouter.get('/verify-signup-code', accountVerificationController.verifyCode);
+apiRouter.post('/forgot-password', passwordVerificationController.forgotPassword);
+apiRouter.get('/reset-password', passwordVerificationController.verifyCode);
+apiRouter.post('/reset-password', passwordVerificationController.resetPassword);
 
 module.exports = apiRouter;

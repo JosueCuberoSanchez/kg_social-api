@@ -8,29 +8,8 @@ require('../models/User');
 require('../models/AccountVerification');
 const User = mongoose.model('users');
 const AccountVerification = mongoose.model('accountVerifications');
-const EmailData = require('../private/email-data');
-
-// Email sending
-const nodemailer = require('nodemailer');
-
-const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
-    requireTLS: true,
-    auth: {
-        user: EmailData.email,
-        pass: EmailData.password
-    }
-});
-
-let mailOptions = {
-    from: '"KG Social" <jo96cube@gmail.com>', // sender address
-    to: '', // list of receivers
-    subject: 'KG Social account verification', // Subject line
-    html: '', // plaintext body
-};
-
+const EmailSender = require('../helpers/functions');
+const Constants = require('../helpers/constants');
 const uuidv1 = require('uuid/v1');
 
 // JSON response utility function
@@ -50,12 +29,10 @@ async function login(req, res, next) {
                 respond(res, 404, 'That email is not registered in the system');
                 next();
             } else {
-                console.log('login password:' + req.body.password);
                 bcrypt.hash(req.body.password, 10, function (err, hash){
                     if (err) {
                         return next(err);
                     }
-                    console.log('login hash:' + hash);
                 });
                 bcrypt.compare(req.body.password, user.password, function (err, result) {
                     if (result) {
@@ -118,16 +95,7 @@ async function signup(req, res, next) {
                 });
                 accountVerification.save();
 
-                mailOptions.to = req.body.email;
-                mailOptions.html = `<p>Hello ${req.body.firstName} ${req.body.lastName}, 
-                please click on the following link to verify your account:</p> 
-                <a href="http://localhost:8080/verify/${code}">Verify account</a>`;
-                transporter.sendMail(mailOptions, function(error, info){
-                    if(error){
-                        return console.log(error);
-                    }
-                    console.log('Message sent: ' + info.response);
-                });
+                EmailSender.sendEmail(req.body.firstName, req.body.lastName, req.body.email, code, Constants.SIGN_UP_VERIFICATION);
 
                 respond(res, 201, {
                     email: user.email,
