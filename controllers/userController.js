@@ -71,7 +71,18 @@ async function login(req, res, next) {
     }
 }
 
-async function signup(req, res, next) {
+async function logout(req, res, next) {
+    if (req.session) {
+        req.session.destroy(function(err) {
+            if(err) {
+                return next(err);
+            }
+        });
+    }
+    respond(res, 200)
+}
+
+async function createUser(req, res, next) {
     if (!req.body.email || !req.body.username || !req.body.password || !req.body.lastName || !req.body.firstName) {
         respond(res, 400, 'The request is missing some data');
         next();
@@ -116,15 +127,38 @@ async function signup(req, res, next) {
     }
 }
 
-async function logout(req, res, next) {
-    if (req.session) {
-        req.session.destroy(function(err) {
-            if(err) {
-                return next(err);
+async function updateUser(req, res, next) {
+    if (!req.body.values || !req.body.id) {
+        respond(res, 400, 'The request is missing some data');
+        next();
+    } else {
+        try {
+            let user = await User.findByIdAndUpdate(req.body.id, req.body.values).exec();
+            user = await User.findOne({_id: req.body.id});
+            if (!user) {
+                respond(res, 404, 'User not found');
+                next();
+            } else {
+                respond(res, 200, {
+                    email: user.email,
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    phone: user.phone,
+                    points: user.points,
+                    username: user.username,
+                    facebook: user.facebook,
+                    twitter: user.twitter,
+                    instagram: user.instagram,
+                    image: user.image,
+                    id: user._id
+                });
+                next();
             }
-        });
+        } catch (e) {
+            console.log('Error :', e);
+            next(e) // do not let the server hanging
+        }
     }
-    respond(res, 200)
 }
 
 async function getUser(req, res, next) {
@@ -160,4 +194,4 @@ async function getUser(req, res, next) {
     }
 }
 
-module.exports = { login, signup, logout, getUser };
+module.exports = { login, logout, createUser, updateUser, getUser };
