@@ -23,6 +23,7 @@ apiRouter.get('/logout', userController.logout);
 apiRouter.post('/user', userController.createUser);
 apiRouter.get('/user', userController.getUser);
 apiRouter.put('/user', userController.updateUser);
+apiRouter.put('/user-image', userController.updateUserImage); // image is treated on another route
 
 // Event CRUD
 apiRouter.post('/event', eventController.createEvent);
