@@ -29,7 +29,8 @@ apiRouter.put('/user-image', userController.updateUserImage); // image is treate
 apiRouter.post('/event', eventController.createEvent);
 apiRouter.put('/event', eventController.updateEvent);
 apiRouter.get('/event', eventController.getEvents);
-apiRouter.post('/event/image', eventController.updateEventImage); // image is treated on another route
+apiRouter.post('/event-image', eventController.updateEventImage); // image is treated on another route
+apiRouter.post('/event-pics', eventController.updateEventPics); // images are treated on another route
 
 // Event related models CRUDs
 apiRouter.post('/comment', commentController.createComment);
@@ -39,6 +40,7 @@ apiRouter.post('/unenroll', eventController.unenrollToEvent);
 apiRouter.get('/attendees', eventController.getAttendees);
 apiRouter.post('/votes', voteController.vote);
 apiRouter.get('/votes', voteController.checkVote);
+apiRouter.post('/invite', eventController.inviteUsers);
 
 // Log
 apiRouter.get('/log', logController.getLog);

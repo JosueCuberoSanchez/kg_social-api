@@ -13,6 +13,9 @@ const User = mongoose.model('users');
 const Log = mongoose.model('logs');
 const Attendee = mongoose.model('attendees');
 
+// Helpers
+const EmailSender = require('../helpers/functions');
+
 // JSON response utility function
 const respond = function(res, status, content) {
     res.status(status);
@@ -50,14 +53,16 @@ async function createEvent(req, res, next) {
             // Get event attendees
             const attendees = await Attendee.find({event: event._id});
 
-            // Save event creation to log
-            const log = new Log({
-                action:event.owner + ' has created the event ' + event.title,
-                date: new Date(),
-                link: 'event/'+event._id,
-                author: owner.image
-            })
-            log.save();
+            if(!event.private) {
+                // Save event creation to log
+                const log = new Log({
+                    action:event.owner + ' has created the event ' + event.title,
+                    date: new Date(),
+                    link: 'event/'+event._id,
+                    author: owner.image
+                })
+                log.save();
+            }
 
             // Respond with event & attendees
             respond(res, 201, {event: event, attendees: attendees});
@@ -108,23 +113,29 @@ async function getEvents(req, res, next) {
         let events;
         let attendees;
         switch (req.query.filter) {
-            case 'ALL':
-                events = await Event.find();
+            case 'all':
+                events = await Event.find({private: false});
                 break;
-            case 'ACTIVE':
+            case 'active':
                 events = await Event.find({active: true});
                 break;
-            case 'ENROLLED':
-                events = await Event.find({$or:[ {attendees: {$elemMatch:{enroll:{ $gte: req.query.user }}}},{owner: req.query.user}]});
+            case 'enrolled':
+                const enrolledEvents = await Attendee.find({username: req.query.user}); // get attendee events
+                // get the event from each of those
+                let event;
+                events = [];
+                for(var i in enrolledEvents) {
+                    event = await Event.findOne({_id: enrolledEvents[i].event});
+                    events.push(event);
+                }
                 break;
-            case 'TOP':
-                console.log('HUE');
-                events = await Event.find().sort([['stars', 'descending']]);
+            case 'top':
+                events = await Event.find({private: false}).sort([['stars', 'descending']]);
                 break;
-            case 'OWNED':
+            case 'owned':
                 events = await Event.find({owner: req.query.user});
                 break;
-            case 'ID':
+            case 'id':
                 events = await Event.findOne({_id: req.query.id});
                 attendees = await Attendee.find({event: req.query.id});
                 break;
@@ -133,11 +144,12 @@ async function getEvents(req, res, next) {
             respond(res, 404, 'There are no events in the db');
             next();
         }
-        if(req.query.filter === 'ID'){
+        if(req.query.filter === 'id'){
             respond(res, 200, {event: events, attendees: attendees});
         } else {
             respond(res, 200, {events});
-        }  
+        }
+        next();  
     } catch (e) {
         console.log('Error :', e);
         next(e);
@@ -165,6 +177,41 @@ async function updateEventImage(req, res, next) {
         const owner = await User.findOne({username: event.owner});
         const log = new Log({
             action:owner.username + ' has updated ' + event.title + ' main photo',
+            date: new Date(),
+            link: 'event/'+req.body.id,
+            author: owner.image
+        })
+        log.save();
+
+        // Respond
+        respond(res, 200, {event});
+        next();
+    } catch (e) {
+        console.log('Error :', e);
+        next(e);
+    }
+}
+
+async function updateEventPics(req, res, next) {
+    try {
+        if(!req.body.image || !req.body.id) {
+            respond(res, 400, 'Bad request for image update');
+            next();
+        }
+        const event = await Event.findOne({_id: req.body.id});
+        if (!event) {
+            respond(res, 404, 'Event not found');
+            next();
+        }
+
+        // Add the image
+        event.images.push(req.body.image);
+        event.save();
+
+        // Make image update log
+        const owner = await User.findOne({username: event.owner});
+        const log = new Log({
+            action:owner.username + ' has uploaded a photo for ' + event.title,
             date: new Date(),
             link: 'event/'+req.body.id,
             author: owner.image
@@ -281,4 +328,29 @@ async function getAttendees(req, res, next) {
     }
 }
 
-module.exports = { createEvent, updateEvent, getEvents, updateEventImage, enrollToEvent, unenrollToEvent, getAttendees };
+async function inviteUsers(req, res, next) {
+    try {
+        let user;
+        const event = await Event.findOne({_id: req.body.event});
+        if(!event) {
+            respond(res, 404, 'Event not found');
+            next();
+        }
+        const users = req.body.users;
+        let code;
+        for(let i in users) {
+            user = await User.findOne({email: users[i].email});
+            if(user){
+                EmailSender.sendInviteEmail(user.firstName, users[i].email, event.owner, event.title);
+            }
+        }
+        respond(res, 200, 'Users invited');
+        next();
+    } catch (e) {
+        console.log('Error :', e);
+        next(e);
+    }
+}
+
+module.exports = { createEvent, updateEvent, getEvents, updateEventImage, updateEventPics, 
+    enrollToEvent, unenrollToEvent, getAttendees, inviteUsers };

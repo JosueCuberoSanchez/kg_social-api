@@ -11,7 +11,6 @@ const AccountVerification = mongoose.model('accountVerifications');
 
 // Helpers
 const EmailSender = require('../helpers/functions');
-const Constants = require('../helpers/constants');
 const bcrypt = require('bcrypt');
 
 // Unique ID generator
@@ -116,7 +115,7 @@ async function createUser(req, res, next) {
                 });
                 accountVerification.save();
 
-                EmailSender.sendEmail(req.body.firstName, req.body.lastName, req.body.email, code, Constants.SIGN_UP_VERIFICATION);
+                EmailSender.sendAccountVerificationEmail(user.firstName, user.email, code)
 
                 respond(res, 201, 'User created');
             } catch (e) {

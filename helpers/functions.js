@@ -1,7 +1,6 @@
 // Email sending
 const nodemailer = require('nodemailer');
 const EmailData = require('../private/email-data');
-const Constants = require('../helpers/constants');
 
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
@@ -21,19 +20,11 @@ let mailOptions = {
     html: '', // plaintext body
 };
 
-function sendEmail(firstName, lastName, email, code, type) {
+function sendAccountVerificationEmail(firstName, email, code) {
     mailOptions.to = email;
-    let message;
-    if(type === Constants.FORGOT_PASSWORD){
-        mailOptions.subject = 'KG Social reset password request';
-        mailOptions.html = `<p>Hello, please click on the following link to reset your password:</p> 
-        <a href="http://localhost:8080/resetPassword/${code}">Reset password</a>`; 
-    } else {
-        mailOptions.subject = 'KG Social account verification';
-        mailOptions.html = `<p>Hello ${firstName} ${lastName}, 
-        please click on the following link to verify your account:</p> 
-        <a href="http://localhost:8080/verify/${code}">Verify account</a>`;
-    }
+    mailOptions.subject = 'KG Social event invite';
+    mailOptions.html = `<p>Hello ${firstName}, please click on the following link to verify your account:</p> 
+    <a href="http://localhost:8080/verify/${code}">Confirm assistance</a>`; 
     transporter.sendMail(mailOptions, function(error, info){
         if(error){
             return console.log(error);
@@ -42,4 +33,29 @@ function sendEmail(firstName, lastName, email, code, type) {
     });
 }
 
-module.exports = { sendEmail };
+function sendPasswordResetEmail(firstName, email, code) {
+    mailOptions.to = email;
+    mailOptions.subject = 'KG Social event invite';
+    mailOptions.html = `<p>Hello ${firstName}, please click on the following link to reset your password:</p> 
+    <a href="http://localhost:8080/resetPassword/${code}">Confirm assistance</a>`; 
+    transporter.sendMail(mailOptions, function(error, info){
+        if(error){
+            return console.log(error);
+        }
+        console.log('Message sent: ' + info.response);
+    });
+}
+
+function sendInviteEmail(firstName, email, owner, event) {
+    mailOptions.to = email;
+    mailOptions.subject = 'KG Social event invite';
+    mailOptions.html = `<p>Hello ${firstName}, you have been invited to ${event} by ${owner}.`; 
+    transporter.sendMail(mailOptions, function(error, info){
+        if(error){
+            return console.log(error);
+        }
+        console.log('Message sent: ' + info.response);
+    });
+}
+
+module.exports = { sendAccountVerificationEmail, sendInviteEmail, sendPasswordResetEmail };

@@ -14,7 +14,6 @@ const uuidv1 = require('uuid/v1');
 
 // Helpers
 const EmailSender = require('../helpers/functions');
-const Constants = require('../helpers/constants');
 const bcrypt = require('bcrypt');
 
 // JSON response utility function
@@ -44,7 +43,7 @@ async function forgotPassword(req, res, next) {
         passwordVerification.save();
 
         // Send email
-        EmailSender.sendEmail(null, null, req.body.email, code, Constants.FORGOT_PASSWORD);
+        EmailSender.sendPasswordResetEmail(user.firstName, user.email, code);
 
         // Respond
         respond(res, 200, 'Forgot password request created');
