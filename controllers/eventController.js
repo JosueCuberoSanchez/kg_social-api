@@ -55,7 +55,7 @@ async function createEvent(req, res, next) {
             if(!event.private) {
                 // Save event creation to log
                 const log = new Log({
-                    action:event.owner + ' has created the event ' + event.title,
+                    action: owner.username + ' has created the event ' + event.title,
                     date: new Date(),
                     link: 'event/'+event._id,
                     author: owner._id
@@ -153,7 +153,7 @@ async function getEvents(req, res, next) {
                 events = await Event.find({active: true});
                 break;
             case 'enrolled':
-                const enrolledEvents = await Attendee.find({username: req.query.user}); // get attendee events
+                const enrolledEvents = await Attendee.find({user: req.query.user}); // get attendee events
                 // get the event from each of those
                 let event;
                 events = [];
@@ -161,6 +161,7 @@ async function getEvents(req, res, next) {
                     event = await Event.findOne({_id: enrolledEvents[i].event});
                     events.push(event);
                 }
+                console.log(events);
                 break;
             case 'top':
                 events = await Event.find({private: false}).sort([['stars', 'descending']]);
