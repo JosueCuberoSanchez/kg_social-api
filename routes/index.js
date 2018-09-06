@@ -8,6 +8,7 @@ const logController = require('../controllers/logController');
 const voteController = require('../controllers/voteController');
 const accountVerificationController = require('../controllers/accountVerificationController');
 const passwordVerificationController = require('../controllers/passwordVerificationController');
+const contactRequestController = require('../controllers/contactRequestController');
 
 // Verifications
 apiRouter.get('/verify-signup-code', accountVerificationController.verifyCode);
@@ -44,6 +45,9 @@ apiRouter.post('/votes', voteController.vote);
 apiRouter.get('/votes', voteController.checkVote);
 
 apiRouter.post('/invite', eventController.inviteUsers);
+
+// Contact us
+apiRouter.post('/contact-us', contactRequestController.createContactRequest);
 
 // Log
 apiRouter.get('/log', logController.getLog);

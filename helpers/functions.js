@@ -49,7 +49,7 @@ function sendPasswordResetEmail(firstName, email, code) {
 function sendInviteEmail(firstName, email, owner, event) {
     mailOptions.to = email;
     mailOptions.subject = 'KG Social event invite';
-    mailOptions.html = `<p>Hello ${firstName}, you have been invited to ${event} by ${owner}.`; 
+    mailOptions.html = `<p>Hello ${firstName}, you have been invited to ${event} by ${owner}.</p>`; 
     transporter.sendMail(mailOptions, function(error, info){
         if(error){
             return console.log(error);
@@ -58,4 +58,27 @@ function sendInviteEmail(firstName, email, owner, event) {
     });
 }
 
-module.exports = { sendAccountVerificationEmail, sendInviteEmail, sendPasswordResetEmail };
+async function sendContactRequestEmails(firstName, email, issueTitle, issueDescription) {
+    mailOptions.to = email;
+    mailOptions.subject = 'KG Social contact request';
+    mailOptions.html = `<p>Hello ${firstName}, this is a copy of your contact us request, please do not reply to this message, the issue sent was:</p>
+    <strong>${issueTitle}</strong><p>${issueDescription}</p>`; 
+    await transporter.sendMail(mailOptions, function(error, info){
+        if(error){
+            return console.log(error);
+        }
+        console.log('Message sent: ' + info.response);
+    });
+    mailOptions.to = EmailData.email;
+    mailOptions.subject = 'KG Social contact request';
+    mailOptions.html = `<p>${firstName}, just requested help, the issue sent was:</p>
+    <strong>${issueTitle}</strong><p>${issueDescription}</p>`; 
+    transporter.sendMail(mailOptions, function(error, info){
+        if(error){
+            return console.log(error);
+        }
+        console.log('Message sent: ' + info.response);
+    });
+}
+
+module.exports = { sendAccountVerificationEmail, sendInviteEmail, sendPasswordResetEmail, sendContactRequestEmails };
