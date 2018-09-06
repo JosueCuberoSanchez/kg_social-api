@@ -81,4 +81,19 @@ async function sendContactRequestEmails(firstName, email, issueTitle, issueDescr
     });
 }
 
-module.exports = { sendAccountVerificationEmail, sendInviteEmail, sendPasswordResetEmail, sendContactRequestEmails };
+async function sendEventCancelledEmails(attendees, title) {
+    for(let i in attendees){
+        mailOptions.to = attendees[i].user.email;
+        mailOptions.subject = 'KG Social event cancelled';
+        mailOptions.html = `<p>Hello ${attendees[i].user.firstName}, this email is to notify you that the event ${title} has been cancelled</p>`;
+        await transporter.sendMail(mailOptions, function(error, info){
+            if(error){
+                return console.log(error);
+            }
+            console.log('Message sent: ' + info.response);
+        });
+    }
+}
+
+module.exports = { sendAccountVerificationEmail, sendInviteEmail, sendPasswordResetEmail, 
+    sendContactRequestEmails, sendEventCancelledEmails };

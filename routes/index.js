@@ -30,6 +30,7 @@ apiRouter.put('/user', userController.updateUser);
 apiRouter.post('/event', eventController.createEvent);
 apiRouter.put('/event', eventController.updateEvent);
 apiRouter.get('/event', eventController.getEvents);
+apiRouter.delete('/event', eventController.deleteEvent);
 apiRouter.put('/event-pics', eventController.updateEventPics);
 
 // Event related models CRUDs

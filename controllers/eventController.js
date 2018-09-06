@@ -103,6 +103,40 @@ async function updateEvent(req, res, next) {
     }
 }
 
+async function deleteEvent(req, res, next) {
+    try {
+        if(req.query.id === null) {
+            respond(res, 400, 'Missing event id');
+            next();
+        }
+
+        let event = await Event.findOne({_id: req.query.id}).populate('owner','username');
+        console.log(event);
+
+        // Add an event delete to logs
+        const log = new Log({
+            action: event.owner.username + ' has canceled ' + event.title,
+            date: new Date(),
+            link: 'dashboard/all/',
+            author: event.owner._id
+        });
+        log.save();
+
+        const attendees = await Attendee.find({event: event._id}).populate('user', 'email firstName');
+
+        EmailSender.sendEventCancelledEmails(attendees, event.title);
+
+        Event.find({_id: req.query.id}).remove().exec();
+
+        // Respond
+        respond(res, 200, {event: event});
+        next();
+    } catch (e) {
+        console.log('Error :', e);
+        next(e);
+    }
+}
+
 async function getEvents(req, res, next) {
     try {
         if(!req.query.filter || !req.query.user) {
@@ -353,4 +387,4 @@ async function inviteUsers(req, res, next) {
 }
 
 module.exports = { createEvent, updateEvent, getEvents, updateEventImage, updateEventPics, 
-    enrollToEvent, unenrollToEvent, getAttendees, inviteUsers };
+    enrollToEvent, unenrollToEvent, getAttendees, inviteUsers, deleteEvent };
