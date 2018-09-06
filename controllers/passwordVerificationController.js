@@ -14,7 +14,7 @@ const uuidv1 = require('uuid/v1');
 
 // Helpers
 const EmailSender = require('../helpers/functions');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 // JSON response utility function
 const respond = function(res, status, content) {

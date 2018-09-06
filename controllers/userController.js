@@ -11,7 +11,7 @@ const AccountVerification = mongoose.model('accountVerifications');
 
 // Helpers
 const EmailSender = require('../helpers/functions');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 // Unique ID generator
 const uuidv1 = require('uuid/v1');
