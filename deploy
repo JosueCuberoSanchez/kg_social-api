@@ -1,0 +1,7 @@
+#!/bin/sh
+ cd ~/KG_Social_api
+ git pull
+ npm install — production
+ npm start
+ exit
+EOF
