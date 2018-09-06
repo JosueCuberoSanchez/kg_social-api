@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-require('dotenv').config();
+require('dotenv').config(); // evn support
 
 // Connect to DB
 mongoose.connect(process.env.DATABASE);
