@@ -33,7 +33,7 @@ async function createEvent(req, res, next) {
                 respond(res, 409, 'That event already exists in the system');
                 next();
             } 
-            const owner = await User.findOne({username:req.body.owner});
+            const owner = await User.findOne({_id:req.body.owner});
             if(!owner) {
                 respond(res, 404, 'Owner not found');
                 next();
@@ -44,8 +44,7 @@ async function createEvent(req, res, next) {
 
             // save owner as an attendee to the event
             const attendee = new Attendee({ 
-                username: owner.username,
-                image: owner.image,
+                user: owner._id,
                 event: event._id
             });
             await attendee.save();
@@ -59,7 +58,7 @@ async function createEvent(req, res, next) {
                     action:event.owner + ' has created the event ' + event.title,
                     date: new Date(),
                     link: 'event/'+event._id,
-                    author: owner.image
+                    author: owner._id
                 })
                 log.save();
             }
@@ -86,12 +85,12 @@ async function updateEvent(req, res, next) {
         event = await Event.findOne({_id: req.body.id});
 
         // Add an event update to logs
-        const owner = await User.findOne({username: event.owner});
+        const owner = await User.findOne({_id: event.owner});
         const log = new Log({
             action:owner.username + ' has updated ' + event.title + ' information',
             date: new Date(),
             link: 'event/'+req.body.id,
-            author: owner.image
+            author: owner._id
         });
         log.save();
 
@@ -137,7 +136,7 @@ async function getEvents(req, res, next) {
                 break;
             case 'id':
                 events = await Event.findOne({_id: req.query.id});
-                attendees = await Attendee.find({event: req.query.id});
+                attendees = await Attendee.find({event: req.query.id}).populate('user','username image');
                 break;
         }
         if (!events) {
@@ -179,7 +178,7 @@ async function updateEventImage(req, res, next) {
             action:owner.username + ' has updated ' + event.title + ' main photo',
             date: new Date(),
             link: 'event/'+req.body.id,
-            author: owner.image
+            author: owner._id
         })
         log.save();
 
@@ -209,13 +208,13 @@ async function updateEventPics(req, res, next) {
         event.save();
 
         // Make image update log
-        const owner = await User.findOne({username: event.owner});
+        const owner = await User.findOne({_id: event.owner});
         const log = new Log({
             action:owner.username + ' has uploaded a photo for ' + event.title,
             date: new Date(),
             link: 'event/'+req.body.id,
-            author: owner.image
-        })
+            author: owner._id
+        });
         log.save();
 
         // Respond
@@ -254,7 +253,7 @@ async function enrollToEvent(req, res, next) {
             action:user.username + ' has enrolled to ' + event.title,
             date: new Date(),
             link: 'event/'+req.body.eventId,
-            author: user.image
+            author: user._id
         })
         log.save();
 
@@ -291,7 +290,7 @@ async function unenrollToEvent(req, res, next) {
             action:user.username + ' has unenrolled from ' + event.title,
             date: new Date(),
             link: 'event/'+req.body.eventId,
-            author: user.image
+            author: user._id
         })
         log.save();
 
@@ -317,7 +316,8 @@ async function getAttendees(req, res, next) {
         }
 
         // Get attendees
-        const attendees = await Attendee.find({event: req.query.id});
+        const attendees = await Attendee.find({event: req.query.id}).populate('user','username');
+        console.log(attendees);
 
         // Respond
         respond(res, 200, {attendees});

@@ -23,11 +23,15 @@ async function verifyCode(req, res, next) {
             respond(res, 400, 'The request is missing some data');
             next();
         }
-        const verification = await AccountVerification.findOne({code:req.query.code}); // get verification
+
+        const verification = await AccountVerification.findOne({code:req.query.code});
+
+        console.log(verification);
         if(!verification) {
             respond(res, 404, 'Verification not found');
             next();
         }
+
         const user = await User.findOne({_id:verification.user});
         if(!user){
             respond(res, 404, 'User not found');
@@ -39,7 +43,7 @@ async function verifyCode(req, res, next) {
             action:user.username + ' has joined KG Social!',
             date: new Date(),
             link: 'profile/'+user.username,
-            author: user.image
+            author: user._id
         });
         log.save();
 
@@ -51,18 +55,7 @@ async function verifyCode(req, res, next) {
         AccountVerification.remove({code:req.query.code}).exec();
 
         // Respond
-        respond(res, 200, {
-            email: user.email,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            phone: user.phone,
-            twitter: user.twitter,
-            facebook: user.facebook,
-            instagram: user.instagram,
-            points: user.points,
-            username: user.username,
-            id: user._id
-        });
+        respond(res, 200, 'User account verified');
         next();
     } catch (e) {
         console.log('Error :', e);

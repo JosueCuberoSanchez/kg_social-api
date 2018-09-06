@@ -19,7 +19,7 @@ const respond = function(res, status, content) {
 
 async function getLog(req, res, next) {
     try {
-        const logs = await Log.find().sort({date: 'descending'});
+        const logs = await Log.find().sort({date: 'descending'}).populate('author','image');
         const firstLogs = logs.slice(0,10);
         respond(res, 200, {firstLogs});
     } catch (e) {

@@ -3,9 +3,13 @@
  */
 const mongoose = require('mongoose');
 
+// Related models
+const User = mongoose.model('users');
+const Event = mongoose.model('events');
+
 const voteSchema = new mongoose.Schema({
-    username: {type: String, unique: false, required: true, trim: true},
-    event: {type: String, unique: false, required: true, trim: true}
+    user: { type: mongoose.Schema.ObjectId, ref: "users" },
+    event: { type: mongoose.Schema.ObjectId, ref: "events" }
 });
 
 const Vote = mongoose.model('votes', voteSchema);

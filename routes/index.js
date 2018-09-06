@@ -11,6 +11,7 @@ const passwordVerificationController = require('../controllers/passwordVerificat
 
 // Verifications
 apiRouter.get('/verify-signup-code', accountVerificationController.verifyCode);
+
 apiRouter.post('/forgot-password', passwordVerificationController.forgotPassword);
 apiRouter.get('/reset-password', passwordVerificationController.verifyCode);
 apiRouter.post('/reset-password', passwordVerificationController.resetPassword);
@@ -23,23 +24,25 @@ apiRouter.get('/logout', userController.logout);
 apiRouter.post('/user', userController.createUser);
 apiRouter.get('/user', userController.getUser);
 apiRouter.put('/user', userController.updateUser);
-apiRouter.put('/user-image', userController.updateUserImage); // image is treated on another route
 
 // Event CRUD
 apiRouter.post('/event', eventController.createEvent);
 apiRouter.put('/event', eventController.updateEvent);
 apiRouter.get('/event', eventController.getEvents);
-apiRouter.post('/event-image', eventController.updateEventImage); // image is treated on another route
-apiRouter.post('/event-pics', eventController.updateEventPics); // images are treated on another route
+apiRouter.put('/event-pics', eventController.updateEventPics);
 
 // Event related models CRUDs
 apiRouter.post('/comment', commentController.createComment);
 apiRouter.get('/comment', commentController.getComments);
+
 apiRouter.post('/enroll', eventController.enrollToEvent);
 apiRouter.post('/unenroll', eventController.unenrollToEvent);
+
 apiRouter.get('/attendees', eventController.getAttendees);
+
 apiRouter.post('/votes', voteController.vote);
 apiRouter.get('/votes', voteController.checkVote);
+
 apiRouter.post('/invite', eventController.inviteUsers);
 
 // Log

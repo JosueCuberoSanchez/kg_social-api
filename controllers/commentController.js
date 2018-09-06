@@ -22,12 +22,12 @@ const respond = function(res, status, content) {
 async function createComment(req, res, next) {
     try {
         // Validations
-        if (!req.body.text || !req.body.author || !req.body.eventId) {
+        if (!req.body.text || !req.body.author || !req.body.event) {
             respond(res, 400, 'The request is missing some data');
             next();
         }
-        const author = await User.findOne({username:req.body.author});
-        const event = await Event.findOne({_id:req.body.eventId});
+        const author = await User.findOne({_id:req.body.author});
+        const event = await Event.findOne({_id:req.body.event});
         if(!author) {
             respond(res, 404, 'Author not found');
             next();
@@ -46,7 +46,7 @@ async function createComment(req, res, next) {
             action:req.body.author + ' has commented on ' + event.title + ' event',
             date: new Date(),
             link: 'event/' + req.body.eventId,
-            author: author.image
+            author: author._id
         })
         log.save();
 
@@ -71,17 +71,10 @@ async function getComments(req, res, next) { // maybe comment date, not sure.
         }
 
         // Get comments
-        const comments = await Comment.find({eventId: req.query.id});
-        let author;
-        let commentList = [];
-        for(var i in comments) {
-            author = await User.findOne({username: comments[i].author}); // get the comment's author
-            commentList.push({text: comments[i].text, author: comments[i].author, authorImage: author.image,
-                _id: comments[i]._id, eventId: comments[i].eventId});
-        }
+        const comments = await Comment.find({event: req.query.id}).populate('author','username image');
 
         // Respond
-        respond(res, 200, {commentList});
+        respond(res, 200, {comments});
         next();
     } catch (e) {
         console.log('Error :', e);

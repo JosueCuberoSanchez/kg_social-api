@@ -3,10 +3,13 @@
  */
 const mongoose = require('mongoose');
 
+// Related models
+const User = mongoose.model('users');
+const Event = mongoose.model('events');
+
 const attendeeSchema = new mongoose.Schema({
-    username: {type: String, unique: false, required: true, trim: true},
-    image: {type: String, unique: false, required: true, trim: true},
-    event: {type: String, unique: false, required: true, trim: true}
+    user: { type: mongoose.Schema.ObjectId, ref: "users" },
+    event: { type: mongoose.Schema.ObjectId, ref: "events" } 
 });
 
 const Attendee = mongoose.model('attendees', attendeeSchema);
