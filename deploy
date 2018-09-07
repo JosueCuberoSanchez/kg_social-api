@@ -1,5 +1,5 @@
 #!/bin/sh
- cd ~/KG_Social_api
+ cd ~/KG_Social_api/kg_social-api
  git pull
  npm install — production
  npm start
