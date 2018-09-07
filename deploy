@@ -1,5 +1,5 @@
 #!/bin/sh
- npm install -- production
- npm start
+ npm install
+ node start.js
  exit
 EOF
