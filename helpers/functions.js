@@ -22,9 +22,9 @@ let mailOptions = {
 
 function sendAccountVerificationEmail(firstName, email, code) {
     mailOptions.to = email;
-    mailOptions.subject = 'KG Social event invite';
+    mailOptions.subject = 'KG Social account verification';
     mailOptions.html = `<p>Hello ${firstName}, please click on the following link to verify your account:</p> 
-    <a href="http://localhost:8080/verify/${code}">Confirm assistance</a>`; 
+    <a href="http://localhost:8080/verify/${code}">Verify account</a>`; 
     transporter.sendMail(mailOptions, function(error, info){
         if(error){
             return console.log(error);
@@ -35,7 +35,7 @@ function sendAccountVerificationEmail(firstName, email, code) {
 
 function sendPasswordResetEmail(firstName, email, code) {
     mailOptions.to = email;
-    mailOptions.subject = 'KG Social event invite';
+    mailOptions.subject = 'KG Social password reset request';
     mailOptions.html = `<p>Hello ${firstName}, please click on the following link to reset your password:</p> 
     <a href="http://localhost:8080/resetPassword/${code}">Confirm assistance</a>`; 
     transporter.sendMail(mailOptions, function(error, info){

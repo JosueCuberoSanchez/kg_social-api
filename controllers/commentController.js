@@ -43,7 +43,7 @@ async function createComment(req, res, next) {
 
         // Create comment log
         const log = new Log({
-            action:req.body.author + ' has commented on ' + event.title + ' event',
+            action: author.username + ' has commented on ' + event.title + ' event',
             date: new Date(),
             link: 'event/' + req.body.eventId,
             author: author._id

@@ -127,6 +127,7 @@ async function deleteEvent(req, res, next) {
         EmailSender.sendEventCancelledEmails(attendees, event.title);
 
         Event.find({_id: req.query.id}).remove().exec();
+        Attendee.find({event: event._id}).remove().exec();
 
         // Respond
         respond(res, 200, {event: event});
@@ -276,14 +277,13 @@ async function enrollToEvent(req, res, next) {
 
         // Create attendee
         const attendee = new Attendee({
-            username: user.username,
-            image: user.image,
+            user: user._id,
             event: event._id
         });
         await attendee.save();
 
         // Get attendees
-        const attendees = await Attendee.find({event: req.body.eventId});
+        const attendees = await Attendee.find({event: req.body.eventId}).populate('user','image username');
         const log = new Log({
             action:user.username + ' has enrolled to ' + event.title,
             date: new Date(),
@@ -315,10 +315,10 @@ async function unenrollToEvent(req, res, next) {
         }
 
         // Remove from attendees
-        Attendee.find({username: req.body.username}).remove().exec();
+        Attendee.find({user: user._id, event: event._id}).remove().exec();
 
         // Get attendees
-        const attendees = await Attendee.find({event: req.body.eventId});
+        const attendees = await Attendee.find({event: req.body.eventId}).populate('user', 'image username');
 
         // Create unenroll log
         const log = new Log({
@@ -366,7 +366,7 @@ async function getAttendees(req, res, next) {
 async function inviteUsers(req, res, next) {
     try {
         let user;
-        const event = await Event.findOne({_id: req.body.event});
+        const event = await Event.findOne({_id: req.body.event}).populate('owner','username');
         if(!event) {
             respond(res, 404, 'Event not found');
             next();
@@ -375,11 +375,18 @@ async function inviteUsers(req, res, next) {
         let code;
         for(let i in users) {
             user = await User.findOne({email: users[i].email});
-            if(user){
-                EmailSender.sendInviteEmail(user.firstName, users[i].email, event.owner, event.title);
+            if(user) {
+                const attendee = new Attendee({ 
+                    user: user._id,
+                    event: event._id
+                });
+                await attendee.save();              
+                EmailSender.sendInviteEmail(user.firstName, users[i].email, event.owner.username, event.title);
             }
         }
-        respond(res, 200, 'Users invited');
+        const attendees = await Attendee.find({event: event._id}).populate('user','image username');
+        console.log(attendees);
+        respond(res, 200, {attendees});
         next();
     } catch (e) {
         console.log('Error :', e);
